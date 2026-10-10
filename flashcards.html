@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Set Theory Flashcards</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #000000;
+      --accent: #CF0808;
+      --card-front: #ffffff;
+      --card-back: #111111;
+      --text-dark: #000000;
+      --text-light: #ffffff;
+      --muted: #9a9a9a;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background-color: var(--bg);
+      background-image: linear-gradient(150deg, #000000 60%, #3a0202 100%);
+      color: var(--text-light);
+      font-family: 'Roboto', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 48px;
+    }
+
+    h1 {
+      text-transform: uppercase;
+      letter-spacing: 6px;
+      font-size: 28px;
+      margin: 8px 0 4px;
+      text-align: center;
+      text-shadow: 2px 2px var(--accent);
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin: 0 0 20px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .controls-top {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    select, button {
+      font-family: 'Roboto', sans-serif;
+      font-size: 14px;
+      text-transform: uppercase;
+      border: 1px solid var(--text-light);
+      background: transparent;
+      color: var(--text-light);
+      padding: 8px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    select option { color: #000; }
+
+    button:hover, select:hover {
+      background-color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .progress {
+      width: 100%;
+      max-width: 560px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .bar {
+      width: 100%;
+      max-width: 560px;
+      height: 4px;
+      background: #333;
+      border-radius: 2px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      width: 0;
+      background: var(--accent);
+      transition: width 0.3s;
+    }
+
+    #deck-area {
+      width: 100%;
+      max-width: 560px;
+    }
+
+    .scene {
+      width: 100%;
+      max-width: 560px;
+      height: 340px;
+      perspective: 1200px;
+      cursor: pointer;
+    }
+
+    .card {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.5s;
+      transform-style: preserve-3d;
+    }
+
+    .card.flipped { transform: rotateY(180deg); }
+
+    .face {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: 16px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      overflow-y: auto;
+    }
+
+    .front {
+      background: var(--card-front);
+      color: var(--text-dark);
+      box-shadow: 6px 6px 0 var(--accent);
+    }
+
+    .back {
+      background: var(--card-back);
+      color: var(--text-light);
+      border: 2px solid var(--accent);
+      transform: rotateY(180deg);
+    }
+
+    .topic {
+      position: absolute;
+      top: 14px;
+      left: 18px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent);
+    }
+
+    .hint {
+      position: absolute;
+      bottom: 12px;
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .question {
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .answer {
+      font-size: 18px;
+      line-height: 1.5;
+    }
+
+    .example {
+      margin-top: 14px;
+      font-size: 15px;
+      color: #ddd;
+      background: #222;
+      border-left: 3px solid var(--accent);
+      padding: 8px 12px;
+      text-align: left;
+      border-radius: 4px;
+    }
+
+    .example b { color: var(--accent); }
+
+    .controls-bottom {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 24px;
+    }
+
+    #known { border-color: #2e9e4a; }
+    #known:hover { background-color: #2e9e4a; }
+
+    .keys {
+      margin-top: 18px;
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .done {
+      text-align: center;
+      max-width: 560px;
+    }
+
+    .done h2 { text-transform: uppercase; letter-spacing: 3px; }
+
+    .back-link {
+      margin-top: 28px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .back-link a { color: var(--text-light); }
+
+    @media (max-width: 480px) {
+      .scene { height: 380px; }
+      .question { font-size: 20px; }
+      .answer { font-size: 16px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Set Theory</h1>
+  <p class="subtitle">Beginner flashcards &mdash; tap a card to flip it</p>
+
+  <div class="controls-top">
+    <select id="topic-filter" aria-label="Filter by topic"></select>
+    <button id="shuffle">Shuffle</button>
+    <button id="reset">Reset</button>
+  </div>
+
+  <div class="progress">
+    <span id="position"></span>
+    <span id="mastered"></span>
+  </div>
+  <div class="bar"><div class="bar-fill" id="bar-fill"></div></div>
+
+  <div id="deck-area">
+    <div class="scene" id="scene" tabindex="0" role="button" aria-label="Flip card">
+      <div class="card" id="card">
+        <div class="face front">
+          <span class="topic" id="front-topic"></span>
+          <div class="question" id="question"></div>
+          <span class="hint">Click or press space to reveal</span>
+        </div>
+        <div class="face back">
+          <span class="topic" id="back-topic"></span>
+          <div class="answer" id="answer"></div>
+          <div class="example" id="example"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls-bottom">
+      <button id="prev">&larr; Prev</button>
+      <button id="learning">Still learning</button>
+      <button id="known">Got it</button>
+      <button id="next">Next &rarr;</button>
+    </div>
+  </div>
+
+  <div class="done" id="done" hidden>
+    <h2>Deck complete!</h2>
+    <p>You marked every card in this set as "Got it".</p>
+    <button id="restart">Study again</button>
+  </div>
+
+  <p class="keys">Keys: Space = flip &middot; &larr; / &rarr; = navigate &middot; K = got it &middot; L = still learning</p>
+  <p class="back-link"><a href="index.html">Back to home</a></p>
+
+  <script>
+    var CARDS = [
+      // Basics
+      { topic: "Basics", q: "What is a set?",
+        a: "A well-defined collection of distinct objects, called elements or members. Order doesn't matter and duplicates don't count.",
+        ex: "{1, 2, 3} is the same set as {3, 1, 2} and as {1, 1, 2, 3}." },
+      { topic: "Basics", q: "What does the symbol ∈ mean?",
+        a: "\"Is an element of.\" It says an object belongs to a set. Its opposite is ∉, \"is not an element of.\"",
+        ex: "If A = {a, b, c}, then <b>b ∈ A</b> and <b>z ∉ A</b>." },
+      { topic: "Basics", q: "What is roster (list) notation?",
+        a: "Writing a set by listing all its elements inside curly braces, separated by commas.",
+        ex: "The vowels: <b>{a, e, i, o, u}</b>" },
+      { topic: "Basics", q: "What is set-builder notation?",
+        a: "Describing a set by a rule its elements satisfy: { x | condition on x }. Read the bar as \"such that.\"",
+        ex: "<b>{ x | x is an even number and 0 &lt; x &lt; 10 }</b> = {2, 4, 6, 8}" },
+      { topic: "Basics", q: "What is the empty set?",
+        a: "The set with no elements at all. It is written ∅ or { }. There is exactly one empty set.",
+        ex: "{ x | x is a whole number and x &lt; 0 } = ∅" },
+      { topic: "Basics", q: "What is the cardinality of a set?",
+        a: "The number of elements in the set, written |A| (or n(A)).",
+        ex: "A = {red, green, blue} → <b>|A| = 3</b>. Also |∅| = 0." },
+      { topic: "Basics", q: "Is ∅ the same as {∅}?",
+        a: "No. ∅ has zero elements. {∅} is a set containing one element (the empty set itself), so its cardinality is 1.",
+        ex: "|∅| = 0, but <b>|{∅}| = 1</b>. Think: an empty box vs. a box holding an empty box." },
+      { topic: "Basics", q: "When are two sets equal?",
+        a: "A = B when they contain exactly the same elements — every element of A is in B, and every element of B is in A.",
+        ex: "{1, 2, 3} = {3, 2, 1}, but {1, 2} ≠ {1, 2, 3}." },
+      { topic: "Basics", q: "What is a finite set vs. an infinite set?",
+        a: "A finite set has a countable-to-the-end number of elements. An infinite set never runs out of elements.",
+        ex: "Finite: {days of the week}. Infinite: <b>ℕ = {1, 2, 3, …}</b>" },
+
+      // Subsets
+      { topic: "Subsets", q: "What does A ⊆ B mean?",
+        a: "A is a subset of B: every element of A is also an element of B.",
+        ex: "{1, 2} ⊆ {1, 2, 3}. Also every set is a subset of itself: A ⊆ A." },
+      { topic: "Subsets", q: "What is a proper subset (A ⊂ B)?",
+        a: "A is a subset of B but A ≠ B — B has at least one element A doesn't.",
+        ex: "{1, 2} ⊂ {1, 2, 3}, but {1, 2, 3} is <b>not</b> a proper subset of itself." },
+      { topic: "Subsets", q: "Is the empty set a subset of every set?",
+        a: "Yes. ∅ ⊆ A for any set A, because ∅ has no elements that could fail to be in A.",
+        ex: "∅ ⊆ {1, 2, 3} and ∅ ⊆ ∅." },
+      { topic: "Subsets", q: "What's the difference between ∈ and ⊆?",
+        a: "∈ relates an element to a set. ⊆ relates a set to another set.",
+        ex: "With A = {1, 2}: <b>1 ∈ A</b> is true, <b>{1} ⊆ A</b> is true, but 1 ⊆ A and {1} ∈ A are false." },
+      { topic: "Subsets", q: "What is the power set P(A)?",
+        a: "The set of all subsets of A, including ∅ and A itself.",
+        ex: "A = {a, b} → <b>P(A) = { ∅, {a}, {b}, {a, b} }</b>" },
+      { topic: "Subsets", q: "How many subsets does a set with n elements have?",
+        a: "2ⁿ. Each element is either in or out of a subset — two choices, n times.",
+        ex: "A set with 3 elements has 2³ = <b>8</b> subsets." },
+      { topic: "Subsets", q: "What is the universal set U?",
+        a: "The set of everything being considered in a given problem. All other sets in that problem are subsets of U.",
+        ex: "When talking about dice rolls, U = {1, 2, 3, 4, 5, 6}." },
+
+      // Operations
+      { topic: "Operations", q: "What is the union A ∪ B?",
+        a: "All elements that are in A, or in B, or in both. Think \"OR\" — combine everything.",
+        ex: "{1, 2, 3} ∪ {3, 4} = <b>{1, 2, 3, 4}</b>" },
+      { topic: "Operations", q: "What is the intersection A ∩ B?",
+        a: "Only the elements that are in both A and B. Think \"AND\" — what they share.",
+        ex: "{1, 2, 3} ∩ {2, 3, 4} = <b>{2, 3}</b>" },
+      { topic: "Operations", q: "What are disjoint sets?",
+        a: "Sets that have no elements in common, so A ∩ B = ∅.",
+        ex: "{1, 3, 5} and {2, 4, 6} are disjoint." },
+      { topic: "Operations", q: "What is the difference A − B (or A \\ B)?",
+        a: "Elements that are in A but not in B. Order matters: A − B is usually not B − A.",
+        ex: "{1, 2, 3, 4} − {3, 4, 5} = <b>{1, 2}</b>, while {3, 4, 5} − {1, 2, 3, 4} = {5}." },
+      { topic: "Operations", q: "What is the complement Aᶜ (or A′)?",
+        a: "Everything in the universal set U that is not in A. So Aᶜ = U − A.",
+        ex: "U = {1, …, 6}, A = {1, 2} → <b>Aᶜ = {3, 4, 5, 6}</b>" },
+      { topic: "Operations", q: "What is the symmetric difference A Δ B?",
+        a: "Elements in exactly one of the two sets — in A or B, but not both. A Δ B = (A ∪ B) − (A ∩ B).",
+        ex: "{1, 2, 3} Δ {3, 4} = <b>{1, 2, 4}</b>" },
+      { topic: "Operations", q: "What is the Cartesian product A × B?",
+        a: "The set of all ordered pairs (a, b) where a ∈ A and b ∈ B. |A × B| = |A| · |B|.",
+        ex: "{1, 2} × {x, y} = <b>{(1,x), (1,y), (2,x), (2,y)}</b>" },
+
+      // Laws & Venn diagrams
+      { topic: "Laws & Venn", q: "What is a Venn diagram?",
+        a: "A picture of sets as overlapping circles inside a rectangle (the universal set). Overlaps show shared elements.",
+        ex: "The overlap of circles A and B is A ∩ B; everything inside either circle is A ∪ B." },
+      { topic: "Laws & Venn", q: "What is the inclusion–exclusion principle (two sets)?",
+        a: "|A ∪ B| = |A| + |B| − |A ∩ B|. Subtract the overlap so it isn't counted twice.",
+        ex: "15 like tea, 10 like coffee, 4 like both → 15 + 10 − 4 = <b>21</b> like at least one." },
+      { topic: "Laws & Venn", q: "State De Morgan's laws.",
+        a: "(A ∪ B)ᶜ = Aᶜ ∩ Bᶜ and (A ∩ B)ᶜ = Aᶜ ∪ Bᶜ. Taking the complement flips ∪ and ∩.",
+        ex: "\"Not (tea or coffee)\" means \"not tea <b>and</b> not coffee.\"" },
+      { topic: "Laws & Venn", q: "What are the commutative laws?",
+        a: "Order doesn't matter for union and intersection: A ∪ B = B ∪ A and A ∩ B = B ∩ A.",
+        ex: "{1} ∪ {2} = {2} ∪ {1} = {1, 2}" },
+      { topic: "Laws & Venn", q: "What are the identity laws?",
+        a: "A ∪ ∅ = A and A ∩ U = A. Adding nothing or intersecting with everything leaves A unchanged.",
+        ex: "{1, 2} ∪ ∅ = {1, 2}" },
+      { topic: "Laws & Venn", q: "What is the double complement law?",
+        a: "(Aᶜ)ᶜ = A. Taking the complement twice gets you back where you started.",
+        ex: "\"Not not-even\" numbers are the even numbers." },
+
+      // Number sets
+      { topic: "Number Sets", q: "What is ℕ?",
+        a: "The natural numbers: the counting numbers {1, 2, 3, …}. Some books include 0.",
+        ex: "5 ∈ ℕ, but −2 ∉ ℕ and ½ ∉ ℕ." },
+      { topic: "Number Sets", q: "What is ℤ?",
+        a: "The integers: all whole numbers, positive, negative, and zero {…, −2, −1, 0, 1, 2, …}.",
+        ex: "−7 ∈ ℤ, but 0.5 ∉ ℤ." },
+      { topic: "Number Sets", q: "What is ℚ?",
+        a: "The rational numbers: any number that can be written as a fraction p/q with integers p, q and q ≠ 0.",
+        ex: "¾, −2, and 0.333… are all in ℚ." },
+      { topic: "Number Sets", q: "What is ℝ?",
+        a: "The real numbers: every point on the number line, including rationals and irrationals like √2 and π.",
+        ex: "<b>ℕ ⊂ ℤ ⊂ ℚ ⊂ ℝ</b>" }
+    ];
+
+    var STORAGE_KEY = "setTheoryFlashcardsKnown";
+    var known = loadKnown();
+    var deck = [];
+    var index = 0;
+
+    var els = {};
+    ["topic-filter", "shuffle", "reset", "position", "mastered", "bar-fill", "deck-area", "scene", "card",
+     "front-topic", "back-topic", "question", "answer", "example", "prev", "next", "known", "learning",
+     "done", "restart"].forEach(function (id) { els[id] = document.getElementById(id); });
+
+    function loadKnown() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function saveKnown() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(known));
+      } catch (e) {}
+    }
+
+    function buildFilter() {
+      var topics = ["All topics"];
+      CARDS.forEach(function (c) {
+        if (topics.indexOf(c.topic) === -1) topics.push(c.topic);
+      });
+      topics.forEach(function (t) {
+        var opt = document.createElement("option");
+        opt.value = t;
+        opt.textContent = t;
+        els["topic-filter"].appendChild(opt);
+      });
+    }
+
+    function buildDeck() {
+      var topic = els["topic-filter"].value;
+      deck = CARDS.filter(function (c) {
+        return (topic === "All topics" || c.topic === topic) && !known[c.q];
+      });
+      index = 0;
+      render();
+    }
+
+    function cardsInTopic() {
+      var topic = els["topic-filter"].value;
+      return CARDS.filter(function (c) { return topic === "All topics" || c.topic === topic; });
+    }
+
+    function render() {
+      var all = cardsInTopic();
+      var masteredCount = all.filter(function (c) { return known[c.q]; }).length;
+      els["mastered"].textContent = masteredCount + " / " + all.length + " mastered";
+      els["bar-fill"].style.width = (all.length ? (masteredCount / all.length) * 100 : 0) + "%";
+
+      if (deck.length === 0) {
+        els["deck-area"].hidden = true;
+        els["done"].hidden = false;
+        els["position"].textContent = "";
+        return;
+      }
+      els["deck-area"].hidden = false;
+      els["done"].hidden = true;
+
+      var c = deck[index];
+      els["card"].classList.remove("flipped");
+      els["front-topic"].textContent = c.topic;
+      els["back-topic"].textContent = c.topic;
+      els["question"].textContent = c.q;
+      els["answer"].textContent = c.a;
+      els["example"].innerHTML = "<b>Example:</b> " + c.ex;
+      els["position"].textContent = "Card " + (index + 1) + " of " + deck.length;
+    }
+
+    function flip() { els["card"].classList.toggle("flipped"); }
+
+    function go(step) {
+      if (!deck.length) return;
+      index = (index + step + deck.length) % deck.length;
+      render();
+    }
+
+    function markKnown() {
+      if (!deck.length) return;
+      known[deck[index].q] = true;
+      saveKnown();
+      deck.splice(index, 1);
+      if (index >= deck.length) index = 0;
+      render();
+    }
+
+    function markLearning() {
+      if (!deck.length) return;
+      // Move the card to the end of the deck so it comes back around.
+      var c = deck.splice(index, 1)[0];
+      deck.push(c);
+      if (index >= deck.length) index = 0;
+      render();
+    }
+
+    function shuffle() {
+      for (var i = deck.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = deck[i]; deck[i] = deck[j]; deck[j] = tmp;
+      }
+      index = 0;
+      render();
+    }
+
+    function resetTopic() {
+      cardsInTopic().forEach(function (c) { delete known[c.q]; });
+      saveKnown();
+      buildDeck();
+    }
+
+    els["scene"].addEventListener("click", flip);
+    els["prev"].addEventListener("click", function () { go(-1); });
+    els["next"].addEventListener("click", function () { go(1); });
+    els["known"].addEventListener("click", markKnown);
+    els["learning"].addEventListener("click", markLearning);
+    els["shuffle"].addEventListener("click", shuffle);
+    els["reset"].addEventListener("click", resetTopic);
+    els["restart"].addEventListener("click", resetTopic);
+    els["topic-filter"].addEventListener("change", buildDeck);
+
+    document.addEventListener("keydown", function (e) {
+      if (e.target.tagName === "SELECT" || e.target.tagName === "BUTTON") return;
+      if (e.key === " " || e.key === "Enter") { e.preventDefault(); flip(); }
+      else if (e.key === "ArrowRight") go(1);
+      else if (e.key === "ArrowLeft") go(-1);
+      else if (e.key === "k" || e.key === "K") markKnown();
+      else if (e.key === "l" || e.key === "L") markLearning();
+    });
+
+    buildFilter();
+    buildDeck();
+  </script>
+
+</body>
+
+</html>
